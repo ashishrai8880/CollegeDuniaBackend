@@ -53,15 +53,6 @@ module.exports = {
           reject(createError.InternalServerError())
           return ;
         }
-
-        // client.SET(userId, token, 'EX', 365 * 24 * 60 * 60, (err, reply) => {
-        //   if (err) {
-        //     console.log(err.message)
-        //     reject(createError.InternalServerError())
-        //     return
-        //   }
-        //   resolve(token)
-        // })
         resolve(token)
       })
     })

@@ -11,7 +11,13 @@ module.exports = {
   register: async (req, res, next) => {
     try {
       
-      const result = await authSchema.validateAsync(req.body)
+      const result = await authSchema.validate(req.body)
+      if(result.error){
+        res.status(422).send({
+          'status' : 422,
+          'message' : result.error.message ,
+        })
+      }
 
       const doesExist = await User.findOne({ email: result.email })
       if (doesExist)
@@ -24,14 +30,24 @@ module.exports = {
 
       res.send({ accessToken, refreshToken })
     } catch (error) {
-      if (error.isJoi === true) error.status = 422
-      next(error)
+      console.log(' Registratio failed due to schema 2: ',error);
+      res.status(500).send({
+        'status' : 500,
+        'message' : 'Internal Server Error Occured' ,
+      })
     }
   },
 
   login: async (req, res, next) => {
     try {
-      const result = await authSchema.validateAsync(req.body)
+      const result = await authSchema.validate(req.body);
+      if(result.error){
+        res.status(422).send({
+          'status' : 422,
+          'message' : result.error.message ,
+        })
+      }
+
       const user = await User.findOne({ email: result.email })
       if (!user) throw createError.NotFound('User not registered')
 
@@ -44,23 +60,11 @@ module.exports = {
 
       res.send({ accessToken, refreshToken })
     } catch (error) {
-      if (error.isJoi === true)
-        return next(createError.BadRequest('Invalid Username/Password'))
-      next(error)
-    }
-  },
-
-  refreshToken: async (req, res, next) => {
-    try {
-      const { refreshToken } = req.body
-      if (!refreshToken) throw createError.BadRequest()
-      const userId = await verifyRefreshToken(refreshToken)
-
-      const accessToken = await signAccessToken(userId)
-      const refToken = await signRefreshToken(userId)
-      res.send({ accessToken: accessToken, refreshToken: refToken })
-    } catch (error) {
-      next(error)
+      console.log(' Login failed due to : ',error);
+      res.status(500).send({
+        'status' : 500,
+        'message' : 'Internal Server Error Occured' ,
+      })
     }
   },
 
@@ -78,7 +82,26 @@ module.exports = {
         res.sendStatus(204)
       })
     } catch (error) {
+      console.log(' Logout failed due to : ',error);
+      res.status(500).send({
+        'status' : 500,
+        'message' : 'Internal Server Error Occured' ,
+      })
+    }
+  },
+
+  refreshToken: async (req, res, next) => {
+    try {
+      const { refreshToken } = req.body
+      if (!refreshToken) throw createError.BadRequest()
+      const userId = await verifyRefreshToken(refreshToken)
+
+      const accessToken = await signAccessToken(userId)
+      const refToken = await signRefreshToken(userId)
+      res.send({ accessToken: accessToken, refreshToken: refToken })
+    } catch (error) {
       next(error)
     }
   },
+
 }
