@@ -13,6 +13,18 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
+  phone : {
+    type : String ,
+    required : true ,
+  },
+  city : {
+    type : String ,
+    required : true ,
+  },
+  course : {
+    type : String ,
+    required : true ,
+  }
 })
 
 UserSchema.pre('save', async function (next) {
