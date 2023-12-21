@@ -1,6 +1,7 @@
 const express = require('express')
 const morgan = require('morgan')
-const createError = require('http-errors')
+const createError = require('http-errors');
+const cors = require('cors')
 require('dotenv').config()
 require('./helpers/init_mongodb')
 const { verifyAccessToken } = require('./helpers/jwt_helper')
@@ -10,6 +11,7 @@ const PORT = process.env.PORT || 3000
 const AuthRoute = require('./Routes/Auth.route')
 
 const app = express()
+app.use(cors())
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))

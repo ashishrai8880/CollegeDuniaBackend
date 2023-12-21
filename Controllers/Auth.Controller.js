@@ -12,18 +12,21 @@ module.exports = {
     try {
       
       const result = await authSchema.validateAsync(req.body)
-
+      console.log('result  : ',result);
       const doesExist = await User.findOne({ email: result.email })
       if (doesExist)
         throw createError.Conflict(`${result.email} is already been registered`)
 
       const user = new User(result);
+      console.log('above user  : ',user);
       const savedUser = await user.save()
+      console.log('user  : ',user);
       const accessToken = await signAccessToken(savedUser.id)
       const refreshToken = await signRefreshToken(savedUser.id)
 
-      res.send({ accessToken, refreshToken })
-    } catch (error) {
+      res.send( {'message':'Congratulations ! Registered Successfully' ,  'user' : { 'email' : user.email } ,  'token' : { 'accessToken' : accessToken, 'refreshToken' : refreshToken} })
+    }
+     catch (error) {
       if (error.isJoi === true) error.status = 422
       next(error)
     }
@@ -32,7 +35,8 @@ module.exports = {
   login: async (req, res, next) => {
     try {
       const result = await authSchema.validateAsync(req.body)
-      const user = await User.findOne({ email: result.email })
+      const user = await User.findOne({ email: result.email });
+      console.log('login user',user)
       if (!user) throw createError.NotFound('User not registered')
 
       const isMatch = await user.isValidPassword(result.password)
@@ -42,7 +46,8 @@ module.exports = {
       const accessToken = await signAccessToken(user.id)
       const refreshToken = await signRefreshToken(user.id)
 
-      res.send({ accessToken, refreshToken })
+      // res.send({ accessToken, refreshToken })
+      res.send( {'message':'You have been Log In Successfully' , 'user' : { 'email' : user.email } ,  'token' : { 'accessToken' : accessToken, 'refreshToken' : refreshToken} })
     } catch (error) {
       if (error.isJoi === true)
         return next(createError.BadRequest('Invalid Username/Password'))
